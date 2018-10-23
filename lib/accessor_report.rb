@@ -61,8 +61,10 @@ class AccessorReport
     
     headers = sql_data.first.keys
     headers.each_with_index do |value, col_number|
-      @worksheet.insert_cell(0, col_number, value).change_font_color('ffffff')
-      @worksheet.change_row_fill(0, '000000')
+      @worksheet.insert_cell(0, col_number, "#{value}").change_font_color('ffffff')
+      @worksheet.change_row_fill(0, '5aa4a3')
+      @worksheet.sheet_data[0][col_number].change_vertical_alignment('center')
+      @worksheet.change_row_vertical_alignment(0,'center')
     end
   end
 
