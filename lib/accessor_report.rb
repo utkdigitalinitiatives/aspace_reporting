@@ -40,7 +40,8 @@ class AccessorReport
     end
     @workbook.write(@excel_file)
   end
- def safe_xls_string(x)
+
+  def safe_xls_string(x)
     if x.is_a? String
       if x.to_s.empty?
         x = "NULL"
@@ -53,7 +54,7 @@ class AccessorReport
 
   def cell_class_check(x)
      # x is the cell number / column
-     array = ["Integer", "String", "String", "Date", "String", "String", "String", "Integer", "Integer", "String", "Integer", "String", "String", "Date", "Date", "Integer", $String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String"]
+     array = ["Integer", "String", "String", "Date", "String", "String", "String", "Integer", "Integer", "String", "Integer", "String", "String", "Date", "Date", "Integer", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String"]
      return array[x]
   end
 
@@ -61,12 +62,14 @@ class AccessorReport
     self.validate_workbook
     self.validate_sql_data
     self.set_worksheet
-
     sql_data.each_with_index do |row_data, row_number|
       @worksheet.change_row_height(row_number, 30)
       @worksheet.change_row_fill(row_number, 'eeeeee') if row_number.even?
       row_data.values.each_with_index do |cell_data, cell_number|
-      if cell_class_check(cell_number) == "Integer"
+          if cell_class_check(cell_number).size == 0
+              cell_data = ""
+          end 
+          if cell_class_check(cell_number) == "Integer"
               cell_data = cell_data.to_i
           end
           if cell_class_check(cell_number) == "Date"
@@ -75,7 +78,7 @@ class AccessorReport
           if cell_class_check(cell_number) == "String"
               cell_data = cell_data.to_s
           end
-   	      @worksheet.insert_cell(row_number, cell_number, safe_xls_string(cell_data))
+        @worksheet.insert_cell(row_number, cell_number, safe_xls_string(cell_data))
       end
     end
   end
