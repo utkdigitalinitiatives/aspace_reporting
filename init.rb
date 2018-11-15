@@ -27,4 +27,5 @@ report.write_to_workbook
 report.write_headers
 report.save_workbook
 
+exec("rclone copy /home/don/aspace_reporting/exports/ remote:Shared_Reports/")
 puts "Everything worked congrats!"
