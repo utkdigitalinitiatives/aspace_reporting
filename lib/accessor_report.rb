@@ -1,6 +1,10 @@
 require "mysql2"
 require 'rubyXL'
 
+#Reject all table from 0 ... 0x1F except "\n", "\r", "\t"
+KEPT_CHARS="\n\r\t".split('').map(&:ord)
+REJECTED_CHARS = (0..0x1F).reject{|x| KEPT_CHARS.include?(x) }.map(&:chr).join
+
 class AccessorReport
   attr_accessor :sql_data, :excel_file
   attr_reader :root
@@ -37,16 +41,44 @@ class AccessorReport
     @workbook.write(@excel_file)
   end
 
+  def safe_xls_string(x)
+    if x.is_a? String
+      if x.to_s.empty?
+        x = "NULL"
+      end
+      "{x}".tr(REJECTED_CHARS, '')
+      return x.gsub(/<\/?[^>]*>/, "")
+    end
+    return x
+  end
+
+  def cell_class_check(x)
+     # x is the cell number / column
+     array = ["Integer", "String", "String", "Date", "String", "String", "String", "Integer", "Integer", "String", "Integer", "String", "String", "Date", "Date", "Integer", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String", "String"]
+     return array[x]
+  end
+
   def write_to_workbook
     self.validate_workbook
     self.validate_sql_data
     self.set_worksheet
-
     sql_data.each_with_index do |row_data, row_number|
       @worksheet.change_row_height(row_number, 30)
       @worksheet.change_row_fill(row_number, 'eeeeee') if row_number.even?
       row_data.values.each_with_index do |cell_data, cell_number|
-        @worksheet.insert_cell(row_number, cell_number, cell_data)
+          if cell_class_check(cell_number).size == 0
+              cell_data = ""
+          end 
+          if cell_class_check(cell_number) == "Integer"
+              cell_data = cell_data.to_i
+          end
+          if cell_class_check(cell_number) == "Date"
+              cell_data = cell_data.to_s
+          end
+          if cell_class_check(cell_number) == "String"
+              cell_data = cell_data.to_s
+          end
+        @worksheet.insert_cell(row_number, cell_number, safe_xls_string(cell_data))
       end
     end
   end
@@ -61,8 +93,10 @@ class AccessorReport
     
     headers = sql_data.first.keys
     headers.each_with_index do |value, col_number|
-      @worksheet.insert_cell(0, col_number, value).change_font_color('ffffff')
-      @worksheet.change_row_fill(0, '000000')
+      @worksheet.change_row_fill(0, '5aa4a3')
+      @worksheet.insert_cell(0, col_number, "#{value}").change_font_color('ffffff')
+      @worksheet.sheet_data[0][col_number].change_vertical_alignment('center')
+      @worksheet.change_row_vertical_alignment(0,'center')
     end
   end
 

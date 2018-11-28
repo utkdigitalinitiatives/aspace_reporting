@@ -29,7 +29,7 @@ SELECT
     `agent_contact`.note, 
     `telephone`.number, 
     `resource`.ead_id, 
-    `resource`.title
+    `resource`.title AS "resource_title"
 FROM `accession`
   LEFT JOIN `date`
     ON `accession`.id = `date`.accession_id
